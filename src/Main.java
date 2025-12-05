@@ -7,7 +7,8 @@ public class Main {
         //d1p1();
         //d1p2();
         //d2p1();
-        d2p2();
+        //d2p2();
+        d3p1();
     }
 
     public static void d1p1() throws IOException {
@@ -94,6 +95,7 @@ public class Main {
     public static void d2p1() throws IOException {
         BufferedReader fileReader = new BufferedReader(new FileReader("data/day-2-input.txt"));
         String input = fileReader.readLine();
+        fileReader.close();
         String[] ids = input.split(",");
         long result = 0;
         ArrayList<Long> invalidIds = new ArrayList<>();
@@ -119,6 +121,7 @@ public class Main {
     public static void d2p2() throws IOException {
         BufferedReader fileReader = new BufferedReader(new FileReader("data/day-2-input.txt"));
         String input = fileReader.readLine();
+        fileReader.close();
         String[] ids = input.split(",");
         long result = 0;
         ArrayList<Long> invalidIds = new ArrayList<>();
@@ -157,4 +160,33 @@ public class Main {
         System.out.println("result is: " + result);
     }
 
+    public static void d3p1() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-3-input.txt"));
+        String line = fileReader.readLine();
+        ArrayList<String> banks = new ArrayList<>();
+        int totalJoltage = 0;
+        while(line != null) {
+            banks.add(line);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        for(int i = 0; i < banks.size(); i++){
+            String bank = banks.get(i);
+            int maxJoltage = 0;
+            for(int j = 0; j < bank.length(); j++){
+                for(int k = j+1; k < bank.length(); k++){
+                    String currentJoltageStr = "";
+                    currentJoltageStr += bank.charAt(j);
+                    currentJoltageStr += bank.charAt(k);
+                    int currentJoltage = Integer.parseInt(currentJoltageStr);
+                    if(currentJoltage > maxJoltage){
+                        maxJoltage = currentJoltage;
+                    }
+                }
+            }
+            System.out.printf("Max joltage for bank %d is %d\n", i, maxJoltage);
+            totalJoltage+=maxJoltage;
+        }
+        System.out.println("Sum of max joltages per bank = " + totalJoltage);
+    }
 }
