@@ -5,7 +5,8 @@ import java.util.Optional;
 public class Main {
     public static void main(String[] args) throws IOException {
         //d1p1();
-        d1p2();
+        //d1p2();
+        d2p1();
     }
 
     public static void d1p1() throws IOException {
@@ -13,7 +14,7 @@ public class Main {
         int maxVal = 99;
         int currentVal = 50;
         int zeroCounter = 0;
-        BufferedReader fileReader = new BufferedReader(new FileReader(new File("data/day-1-input.txt")));
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-1-input.txt"));
         ArrayList<String> rotations = new ArrayList<>();
         String line = fileReader.readLine();
         while(line != null){
@@ -53,7 +54,7 @@ public class Main {
         int maxVal = 99;
         int currentVal = 50;
         int zeroCounter = 0;
-        BufferedReader fileReader = new BufferedReader(new FileReader(new File("data/day-1-input.txt")));
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-1-input.txt"));
         ArrayList<String> rotations = new ArrayList<>();
         String line = fileReader.readLine();
         while(line != null){
@@ -88,5 +89,30 @@ public class Main {
         System.out.printf("zero counter = %d\n", zeroCounter);
     }
 
+    //todo there is definitely a faster way to do this
+    public static void d2p1() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-2-input.txt"));
+        String input = fileReader.readLine();
+        String[] ids = input.split(",");
+        long result = 0;
+        ArrayList<Long> invalidIds = new ArrayList<>();
+        for(int i = 0; i < ids.length; i++){
+            String idRange = ids[i];
+            int dashIndex = idRange.indexOf("-");
+            long startId = Long.parseLong(idRange.substring(0,dashIndex));
+            long endId = Long.parseLong(idRange.substring(dashIndex+1));
+            for(long j = startId; j <= endId; j++){
+                String id = String.valueOf(j);
+                if(id.length()%2 == 0 && id.substring(0,id.length()/2).equals(id.substring(id.length()/2))){
+                    invalidIds.add(j);
+                    System.out.println(j + " is an invalid id");
+                }
+            }
+        }
+        for(int i = 0; i < invalidIds.size(); i++){
+            result+=invalidIds.get(i);
+        }
+        System.out.println("result is: " + result);
+    }
 
 }
