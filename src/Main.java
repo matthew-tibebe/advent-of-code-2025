@@ -9,7 +9,9 @@ public class Main {
         //d2p1();
         //d2p2();
         //d3p1();
-        d3p2();
+        //d3p2();
+        //d4p1();
+        d4p2();
     }
 
     public static void d1p1() throws IOException {
@@ -234,5 +236,119 @@ public class Main {
             totalJoltage+=maxJoltage;
         }
         System.out.println("Sum of max joltages per bank = " + totalJoltage);
+    }
+
+    public static void d4p1() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-4-input.txt"));
+        String line = fileReader.readLine();
+        ArrayList<String> rows = new ArrayList<>();
+        while(line != null){
+            rows.add(line);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        int numRows = rows.size();
+        int numCols = rows.get(0).length();
+        int accessible = 0;
+        char[][] grid = new char[numRows][numCols];
+        for(int i = 0; i < rows.size(); i++){
+            String row = rows.get(i);
+            for(int j = 0; j < row.length(); j++){
+                grid[i][j] = row.charAt(j);
+            }
+        }
+        for(int i = 0; i < numRows; i++){
+            for(int j = 0; j < numCols; j++){
+                if(grid[i][j] == '@'){
+                    int rollCounter = 0;
+                    for(int ii = i-1; ii < i+2; ii++){
+                        for(int jj = j-1; jj < j+2; jj++){
+                            if(ii > -1 && ii < numRows && jj > -1 && jj < numCols){
+                                if(grid[ii][jj] == '@'){
+                                    rollCounter++;
+                                }
+                            }
+                        }
+                    }
+                    if(rollCounter < 5){ //account for counting self
+                        accessible++;
+                        System.out.print('x');
+                    } else {
+                        System.out.print('@');
+                    }
+                } else {
+                    System.out.print('.');
+                }
+            }
+            System.out.print('\n');
+        }
+        System.out.println(accessible + " rolls of paper are accessible.");
+    }
+
+    public static void d4p2() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-4-input.txt"));
+        String line = fileReader.readLine();
+        ArrayList<String> rows = new ArrayList<>();
+        while(line != null){
+            rows.add(line);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        int numRows = rows.size();
+        int numCols = rows.get(0).length();
+        int accessible = 0;
+        char[][] grid = new char[numRows][numCols];
+        for(int i = 0; i < rows.size(); i++){
+            String row = rows.get(i);
+            for(int j = 0; j < row.length(); j++){
+                grid[i][j] = row.charAt(j);
+            }
+        }
+        Day4Result ans = day4Helper(numRows, numCols,grid);
+        while(ans.accessible > 0){
+            accessible+=ans.accessible;
+            ans = day4Helper(numRows, numCols,ans.grid);
+        }
+        System.out.println(accessible + " rolls of paper are accessible.");
+    }
+
+    public static Day4Result day4Helper(int numRows, int numCols, char[][] grid){
+        int accessible = 0;
+        char[][] newGrid = new char[numRows][numCols];
+        for(int i = 0; i < numRows; i++){
+            for(int j = 0; j < numCols; j++){
+                if(grid[i][j] == '@'){
+                    int rollCounter = 0;
+                    for(int ii = i-1; ii < i+2; ii++){
+                        for(int jj = j-1; jj < j+2; jj++){
+                            if(ii > -1 && ii < numRows && jj > -1 && jj < numCols){
+                                if(grid[ii][jj] == '@'){
+                                    rollCounter++;
+                                }
+                            }
+                        }
+                    }
+                    if(rollCounter < 5){ //account for counting self
+                        accessible++;
+                        newGrid[i][j] = '.';
+                    } else {
+                        newGrid[i][j] = '@';
+                    }
+                } else {
+                    newGrid[i][j] = '.';
+                }
+            }
+        }
+        return new Day4Result(newGrid, accessible);
+    }
+}
+
+class Day4Result{
+    char[][] grid;
+    int accessible;
+
+    public Day4Result(char[][] g, int a){
+        grid = g;
+        accessible = a;
     }
 }
