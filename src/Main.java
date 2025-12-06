@@ -8,7 +8,8 @@ public class Main {
         //d1p2();
         //d2p1();
         //d2p2();
-        d3p1();
+        //d3p1();
+        d3p2();
     }
 
     public static void d1p1() throws IOException {
@@ -184,6 +185,51 @@ public class Main {
                     }
                 }
             }
+            System.out.printf("Max joltage for bank %d is %d\n", i, maxJoltage);
+            totalJoltage+=maxJoltage;
+        }
+        System.out.println("Sum of max joltages per bank = " + totalJoltage);
+    }
+
+    public static void d3p2() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-3-input.txt"));
+        String line = fileReader.readLine();
+        ArrayList<String> banks = new ArrayList<>();
+        long totalJoltage = 0;
+        while(line != null) {
+            banks.add(line);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        for(int i = 0; i < banks.size(); i++){
+            String bank = banks.get(i);
+            String voltageStr = "";
+            long maxJoltage = 0;
+            int startingIndex = 0;
+            //scan from 0 to n-11, pick largest number (tiebreaker: earlier in seq), then scan from p to n-10 pick largest number, repeat until 12 digit number?
+            //811111111111119
+            //--------------
+            //8111111111119
+            while(voltageStr.length() < 12){
+                int checkLen = 11-voltageStr.length();
+                //System.out.printf("check len = %d\tstartingIndex = %d\n",checkLen,startingIndex);
+                if(startingIndex + checkLen < bank.length()) {
+                    int endIndex = startingIndex + (bank.substring(startingIndex).length()-checkLen);
+                    int vIndex = startingIndex;
+                    char cVolt = bank.charAt(startingIndex);
+                    //System.out.printf("start index is %d\tend index is %d\tcVolt is %c\n", startingIndex, endIndex, cVolt);
+                    for (int j = startingIndex; j < endIndex; j++) {
+                        if (bank.charAt(j) > cVolt && bank.substring(j).length()+voltageStr.length() >= 12) {
+                            vIndex = j;
+                            cVolt = bank.charAt(j);
+                        }
+                    }
+                    startingIndex = vIndex + 1;
+                    voltageStr += String.valueOf(cVolt);
+                }
+                //System.out.println(voltageStr);
+            }
+            maxJoltage = Long.parseLong(voltageStr);
             System.out.printf("Max joltage for bank %d is %d\n", i, maxJoltage);
             totalJoltage+=maxJoltage;
         }
