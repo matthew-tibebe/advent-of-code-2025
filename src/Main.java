@@ -11,7 +11,8 @@ public class Main {
         //d3p1();
         //d3p2();
         //d4p1();
-        d4p2();
+        //d4p2();
+        d5p1();
     }
 
     public static void d1p1() throws IOException {
@@ -310,6 +311,46 @@ public class Main {
             ans = day4Helper(numRows, numCols,ans.grid);
         }
         System.out.println(accessible + " rolls of paper are accessible.");
+    }
+
+    public static void d5p1() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-5-input.txt"));
+        ArrayList<String> idRangeList = new ArrayList<>();
+        ArrayList<Long> ingredientIDs = new ArrayList<>();
+        boolean fillIdList = false;
+        int numSpoiled = 0;
+        String line = fileReader.readLine();
+        while(line != null){
+            if(line.isEmpty()){
+                fillIdList = true;
+                line = fileReader.readLine();
+            }
+            if(fillIdList){
+                ingredientIDs.add(Long.parseLong(line));
+            } else {
+                idRangeList.add(line);
+            }
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        for(int i = 0; i < ingredientIDs.size(); i++){
+            long ingredientID = ingredientIDs.get(i);
+            boolean spoiled = true;
+            for(int j = 0; j < idRangeList.size(); j++){
+                String range = idRangeList.get(j);
+                int dashIndex = range.indexOf('-');
+                long lowEnd = Long.parseLong(range.substring(0,dashIndex));
+                long highEnd = Long.parseLong(range.substring(dashIndex+1));
+                if(ingredientID >= lowEnd && ingredientID <= highEnd){
+                    spoiled = false;
+                    break;
+                }
+            }
+            if(spoiled){
+                numSpoiled++;
+            }
+        }
+        System.out.println("There are " + (ingredientIDs.size()-numSpoiled) + " fresh ingredients");
     }
 
     public static Day4Result day4Helper(int numRows, int numCols, char[][] grid){
