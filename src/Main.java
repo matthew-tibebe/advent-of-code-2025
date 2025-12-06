@@ -361,6 +361,7 @@ public class Main {
         BufferedReader fileReader = new BufferedReader(new FileReader("data/day-5-input.txt"));
         ArrayList<String> idRangeList = new ArrayList<>();
         ArrayList<Long> freshIds = new ArrayList<>();
+        long freshIDCount = 0;
         String line = fileReader.readLine();
         while(line != null){
             if(line.isEmpty()){
@@ -370,20 +371,21 @@ public class Main {
             line = fileReader.readLine();
         }
         fileReader.close();
-        for(int i = 0; i < idRangeList.size(); i++){
-            String idRange = idRangeList.get(i);
-            int dashIndex = idRange.indexOf('-');
-            long lowEnd = Long.parseLong(idRange.substring(0,dashIndex));
-            long highEnd = Long.parseLong(idRange.substring(dashIndex+1));
-            System.out.printf("checking range %d to %d\n", lowEnd, highEnd);
-            for(long j = lowEnd; j <= highEnd; j++){
-                if(!freshIds.contains(j)){
-                    freshIds.add(j);
-                    System.out.println("added " + j);
-                }
-            }
+        ArrayList<String> modifiedIdRangeList = day5Helper(idRangeList);
+        ArrayList<String> oldModifiedIDRangeList = idRangeList;
+        while(!modifiedIdRangeList.equals(oldModifiedIDRangeList)){
+            oldModifiedIDRangeList = modifiedIdRangeList;
+            modifiedIdRangeList = day5Helper(oldModifiedIDRangeList);
         }
-        System.out.println("There are " + freshIds.size() + " fresh ingredients");
+        System.out.println("----------");
+        for(int i = 0; i < modifiedIdRangeList.size(); i++){
+            String modIDRange = modifiedIdRangeList.get(i);
+            int dashIndex = modIDRange.indexOf('-');
+            long lowEnd = Long.parseLong(modIDRange.substring(0,dashIndex));
+            long highEnd = Long.parseLong(modIDRange.substring(dashIndex+1));
+            freshIDCount+=(highEnd-lowEnd+1);
+        }
+        System.out.println("There are " + freshIDCount + " fresh ingredients");
     }
 
     public static Day4Result day4Helper(int numRows, int numCols, char[][] grid){
@@ -414,6 +416,40 @@ public class Main {
             }
         }
         return new Day4Result(newGrid, accessible);
+    }
+
+    public static ArrayList<String> day5Helper(ArrayList<String> idRangeList){
+        ArrayList<String> modifiedIdRangeList = new ArrayList<>();
+        for(int i = 0; i < idRangeList.size(); i++){
+            String idRange = idRangeList.get(i);
+            int dashIndex = idRange.indexOf('-');
+            long lowEnd = Long.parseLong(idRange.substring(0,dashIndex));
+            long highEnd = Long.parseLong(idRange.substring(dashIndex+1));
+            System.out.printf("checking range %d to %d\n", lowEnd, highEnd);
+            if(modifiedIdRangeList.size() < 1){
+                modifiedIdRangeList.add(idRange);
+            } else {
+                for(int j = 0; j < modifiedIdRangeList.size(); j++){
+                    String modIDRange = modifiedIdRangeList.get(j);
+                    int modDashIndex = modIDRange.indexOf('-');
+                    long modLowEnd = Long.parseLong(modIDRange.substring(0,modDashIndex));
+                    long modHighEnd = Long.parseLong(modIDRange.substring(modDashIndex+1));
+                    if(lowEnd >= modLowEnd && lowEnd <= modHighEnd){
+                        lowEnd = modHighEnd+1;
+                    }
+                    if(highEnd >= modLowEnd && highEnd <= modHighEnd){
+                        highEnd = modLowEnd-1;
+                    }
+                }
+                if(lowEnd <= highEnd) {
+                    String newRange = String.valueOf(lowEnd).concat("-").concat(String.valueOf(highEnd));
+                    if(!modifiedIdRangeList.contains(newRange)) {
+                        modifiedIdRangeList.add(newRange);
+                    }
+                }
+            }
+        }
+        return modifiedIdRangeList;
     }
 }
 
