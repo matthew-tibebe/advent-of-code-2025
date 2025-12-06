@@ -1,5 +1,7 @@
 import java.io.*;
+import java.sql.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
 
 public class Main {
@@ -12,7 +14,8 @@ public class Main {
         //d3p2();
         //d4p1();
         //d4p2();
-        d5p1();
+        //d5p1();
+        d5p2();
     }
 
     public static void d1p1() throws IOException {
@@ -351,6 +354,36 @@ public class Main {
             }
         }
         System.out.println("There are " + (ingredientIDs.size()-numSpoiled) + " fresh ingredients");
+    }
+
+    //todo make better bc this sucks hard
+    public static void d5p2() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-5-input.txt"));
+        ArrayList<String> idRangeList = new ArrayList<>();
+        ArrayList<Long> freshIds = new ArrayList<>();
+        String line = fileReader.readLine();
+        while(line != null){
+            if(line.isEmpty()){
+                break;
+            }
+            idRangeList.add(line);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        for(int i = 0; i < idRangeList.size(); i++){
+            String idRange = idRangeList.get(i);
+            int dashIndex = idRange.indexOf('-');
+            long lowEnd = Long.parseLong(idRange.substring(0,dashIndex));
+            long highEnd = Long.parseLong(idRange.substring(dashIndex+1));
+            System.out.printf("checking range %d to %d\n", lowEnd, highEnd);
+            for(long j = lowEnd; j <= highEnd; j++){
+                if(!freshIds.contains(j)){
+                    freshIds.add(j);
+                    System.out.println("added " + j);
+                }
+            }
+        }
+        System.out.println("There are " + freshIds.size() + " fresh ingredients");
     }
 
     public static Day4Result day4Helper(int numRows, int numCols, char[][] grid){
