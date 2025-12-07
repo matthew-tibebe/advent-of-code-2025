@@ -1,8 +1,11 @@
 import java.io.*;
 import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
+
+import static java.lang.Math.min;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -360,7 +363,6 @@ public class Main {
     public static void d5p2() throws IOException {
         BufferedReader fileReader = new BufferedReader(new FileReader("data/day-5-input.txt"));
         ArrayList<String> idRangeList = new ArrayList<>();
-        ArrayList<Long> freshIds = new ArrayList<>();
         long freshIDCount = 0;
         String line = fileReader.readLine();
         while(line != null){
@@ -371,21 +373,20 @@ public class Main {
             line = fileReader.readLine();
         }
         fileReader.close();
-        ArrayList<String> modifiedIdRangeList = day5Helper(idRangeList);
-        ArrayList<String> oldModifiedIDRangeList = idRangeList;
-        while(!modifiedIdRangeList.equals(oldModifiedIDRangeList)){
-            oldModifiedIDRangeList = modifiedIdRangeList;
-            modifiedIdRangeList = day5Helper(oldModifiedIDRangeList);
+        ArrayList<String> modifiedRangeList = day5Helper(idRangeList);
+        while(!modifiedRangeList.equals(idRangeList)){
+            idRangeList = new ArrayList<>(modifiedRangeList);
+            modifiedRangeList = day5Helper(idRangeList);
         }
-        System.out.println("----------");
-        for(int i = 0; i < modifiedIdRangeList.size(); i++){
-            String modIDRange = modifiedIdRangeList.get(i);
-            int dashIndex = modIDRange.indexOf('-');
-            long lowEnd = Long.parseLong(modIDRange.substring(0,dashIndex));
-            long highEnd = Long.parseLong(modIDRange.substring(dashIndex+1));
-            freshIDCount+=(highEnd-lowEnd+1);
+        for(int i = 0; i < modifiedRangeList.size(); i++){
+            String idRange = modifiedRangeList.get(i);
+            System.out.println(idRange);
+            int dashIndex = idRange.indexOf('-');
+            long idRangeLow = Long.parseLong(idRange.substring(0,dashIndex));
+            long idRangeHigh = Long.parseLong(idRange.substring(dashIndex+1));
+            freshIDCount += idRangeHigh-idRangeLow+1;
         }
-        System.out.println("There are " + freshIDCount + " fresh ingredients");
+        System.out.println("There are " + freshIDCount + " fresh ids");
     }
 
     public static Day4Result day4Helper(int numRows, int numCols, char[][] grid){
@@ -419,37 +420,46 @@ public class Main {
     }
 
     public static ArrayList<String> day5Helper(ArrayList<String> idRangeList){
-        ArrayList<String> modifiedIdRangeList = new ArrayList<>();
+        ArrayList<String> modifiedRangeList = new ArrayList<>();
+        //saw a meme about sorting on the AOC subreddit so
+        idRangeList.sort((o1, o2) -> {
+            long o1Low = Long.parseLong(o1.substring(0,o1.indexOf('-')));
+            long o2Low = Long.parseLong(o2.substring(0,o2.indexOf('-')));
+            System.out.printf("test %s %s %s %s %d %d\n", o1, o1, o2.substring(0,o1.indexOf('-')), o1.substring(0,o2.indexOf('-')), o1Low, o2Low);
+            return Long.compare(o1Low, o2Low);
+        });
         for(int i = 0; i < idRangeList.size(); i++){
             String idRange = idRangeList.get(i);
-            int dashIndex = idRange.indexOf('-');
-            long lowEnd = Long.parseLong(idRange.substring(0,dashIndex));
-            long highEnd = Long.parseLong(idRange.substring(dashIndex+1));
-            System.out.printf("checking range %d to %d\n", lowEnd, highEnd);
-            if(modifiedIdRangeList.size() < 1){
-                modifiedIdRangeList.add(idRange);
+            if(modifiedRangeList.size() < 1){
+                modifiedRangeList.add(idRange);
             } else {
-                for(int j = 0; j < modifiedIdRangeList.size(); j++){
-                    String modIDRange = modifiedIdRangeList.get(j);
-                    int modDashIndex = modIDRange.indexOf('-');
-                    long modLowEnd = Long.parseLong(modIDRange.substring(0,modDashIndex));
-                    long modHighEnd = Long.parseLong(modIDRange.substring(modDashIndex+1));
-                    if(lowEnd >= modLowEnd && lowEnd <= modHighEnd){
-                        lowEnd = modHighEnd+1;
+                int dashIndex = idRange.indexOf('-');
+                long idRangeLow = Long.parseLong(idRange.substring(0,dashIndex));
+                long idRangeHigh = Long.parseLong(idRange.substring(dashIndex+1));
+                for(int j = 0; j < modifiedRangeList.size(); j++){
+                    String modIdRange = modifiedRangeList.get(j);
+                    int modDashIndex = modIdRange.indexOf('-');
+                    long modIDRangeLow = Long.parseLong(modIdRange.substring(0,modDashIndex));
+                    long modIDRangeHigh = Long.parseLong(modIdRange.substring(modDashIndex+1));
+                    if(idRangeLow >= modIDRangeLow && idRangeLow <= modIDRangeHigh){
+                        idRangeLow = modIDRangeHigh+1;
                     }
-                    if(highEnd >= modLowEnd && highEnd <= modHighEnd){
-                        highEnd = modLowEnd-1;
+                    if(idRangeHigh >= modIDRangeLow && idRangeHigh <= modIDRangeHigh){ //maybe unessecary idk
+                        idRangeHigh = modIDRangeLow-1;
                     }
                 }
-                if(lowEnd <= highEnd) {
-                    String newRange = String.valueOf(lowEnd).concat("-").concat(String.valueOf(highEnd));
-                    if(!modifiedIdRangeList.contains(newRange)) {
-                        modifiedIdRangeList.add(newRange);
-                    }
+                if(idRangeLow <= idRangeHigh) {
+                    String newRange = String.valueOf(idRangeLow).concat("-").concat(String.valueOf(idRangeHigh));
+                    modifiedRangeList.add(newRange);
                 }
             }
         }
-        return modifiedIdRangeList;
+        modifiedRangeList.sort((o1, o2) -> {
+            long o1Low = Long.parseLong(o1.substring(0,o1.indexOf('-')));
+            long o2Low = Long.parseLong(o2.substring(0,o2.indexOf('-')));
+            return Long.compare(o1Low, o2Low);
+        });
+        return modifiedRangeList;
     }
 }
 
