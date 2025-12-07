@@ -18,7 +18,9 @@ public class Main {
         //d4p1();
         //d4p2();
         //d5p1();
-        d5p2();
+        //d5p2();
+        //d6p1();
+        d6p2();
     }
 
     public static void d1p1() throws IOException {
@@ -319,6 +321,36 @@ public class Main {
         System.out.println(accessible + " rolls of paper are accessible.");
     }
 
+    public static Day4Result day4Helper(int numRows, int numCols, char[][] grid){
+        int accessible = 0;
+        char[][] newGrid = new char[numRows][numCols];
+        for(int i = 0; i < numRows; i++){
+            for(int j = 0; j < numCols; j++){
+                if(grid[i][j] == '@'){
+                    int rollCounter = 0;
+                    for(int ii = i-1; ii < i+2; ii++){
+                        for(int jj = j-1; jj < j+2; jj++){
+                            if(ii > -1 && ii < numRows && jj > -1 && jj < numCols){
+                                if(grid[ii][jj] == '@'){
+                                    rollCounter++;
+                                }
+                            }
+                        }
+                    }
+                    if(rollCounter < 5){ //account for counting self
+                        accessible++;
+                        newGrid[i][j] = '.';
+                    } else {
+                        newGrid[i][j] = '@';
+                    }
+                } else {
+                    newGrid[i][j] = '.';
+                }
+            }
+        }
+        return new Day4Result(newGrid, accessible);
+    }
+
     public static void d5p1() throws IOException {
         BufferedReader fileReader = new BufferedReader(new FileReader("data/day-5-input.txt"));
         ArrayList<String> idRangeList = new ArrayList<>();
@@ -359,7 +391,6 @@ public class Main {
         System.out.println("There are " + (ingredientIDs.size()-numSpoiled) + " fresh ingredients");
     }
 
-    //todo make better bc this sucks hard
     public static void d5p2() throws IOException {
         BufferedReader fileReader = new BufferedReader(new FileReader("data/day-5-input.txt"));
         ArrayList<String> idRangeList = new ArrayList<>();
@@ -387,36 +418,6 @@ public class Main {
             freshIDCount += idRangeHigh-idRangeLow+1;
         }
         System.out.println("There are " + freshIDCount + " fresh ids");
-    }
-
-    public static Day4Result day4Helper(int numRows, int numCols, char[][] grid){
-        int accessible = 0;
-        char[][] newGrid = new char[numRows][numCols];
-        for(int i = 0; i < numRows; i++){
-            for(int j = 0; j < numCols; j++){
-                if(grid[i][j] == '@'){
-                    int rollCounter = 0;
-                    for(int ii = i-1; ii < i+2; ii++){
-                        for(int jj = j-1; jj < j+2; jj++){
-                            if(ii > -1 && ii < numRows && jj > -1 && jj < numCols){
-                                if(grid[ii][jj] == '@'){
-                                    rollCounter++;
-                                }
-                            }
-                        }
-                    }
-                    if(rollCounter < 5){ //account for counting self
-                        accessible++;
-                        newGrid[i][j] = '.';
-                    } else {
-                        newGrid[i][j] = '@';
-                    }
-                } else {
-                    newGrid[i][j] = '.';
-                }
-            }
-        }
-        return new Day4Result(newGrid, accessible);
     }
 
     public static ArrayList<String> day5Helper(ArrayList<String> idRangeList){
@@ -460,6 +461,113 @@ public class Main {
             return Long.compare(o1Low, o2Low);
         });
         return modifiedRangeList;
+    }
+
+    public static void d6p1() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-6-input.txt"));
+        String line = fileReader.readLine();
+        ArrayList<String> allLines = new ArrayList<>();
+        ArrayList<ArrayList<String>> problems = new ArrayList<ArrayList<String>>();
+        long result = 0;
+        while(line != null){
+            allLines.add(line);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        for(int i = 0; i < allLines.size(); i++){
+            line = allLines.get(i);
+            ArrayList<String> rows = new ArrayList<>();
+            while(line.indexOf(' ') != -1){
+                String input;
+                if(line.indexOf(' ') != -1) {
+                    input = line.substring(0, line.indexOf(' '));
+                } else {
+                    input = line.trim();
+                }
+                if(!input.isEmpty()){
+                    rows.add(input);
+                }
+                line = line.substring(line.indexOf(' ')+1).trim();
+            }
+            rows.add(line.trim());
+            problems.add(rows);
+        }
+        for(int i = 0; i < problems.get(0).size(); i++){
+            String operator = problems.get(problems.size()-1).get(i);
+            ArrayList<String> operands = new ArrayList<>();
+            for(int j = 0; j < problems.size()-1; j++){
+                operands.add(problems.get(j).get(i));
+            }
+            if(operator.equals("+")){
+                result+=sum(operands);
+            }
+            if(operator.equals("*")){
+                result+=mult(operands);
+            }
+        }
+        System.out.println("The total of answers to all problems is " + result);
+    }
+
+    public static void d6p2() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-6-input.txt"));
+        String line = fileReader.readLine();
+        ArrayList<String> allLines = new ArrayList<>();
+        ArrayList<ArrayList<String>> problems = new ArrayList<ArrayList<String>>();
+        long result = 0;
+        while(line != null){
+            allLines.add(line);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        for(int i = 0; i < allLines.size(); i++){
+            line = allLines.get(i);
+            ArrayList<String> rows = new ArrayList<>();
+            while(line.indexOf(' ') != -1){
+                String input;
+                if(line.indexOf(' ') != -1) {
+                    input = line.substring(0, line.indexOf(' '));
+                } else {
+                    input = line.trim();
+                }
+                if(!input.isEmpty()){
+                    rows.add(input);
+                }
+                line = line.substring(line.indexOf(' ')+1).trim();
+            }
+            rows.add(line.trim());
+            problems.add(rows);
+        }
+        for(int i = 0; i < problems.get(0).size(); i++){
+            String operator = problems.get(problems.size()-1).get(i);
+            ArrayList<String> operands = new ArrayList<>();
+            for(int j = 0; j < problems.size()-1; j++){
+                operands.add(problems.get(j).get(i));
+            }
+            //pad and flip
+            if(operator.equals("+")){
+                result+=sum(operands);
+            }
+            if(operator.equals("*")){
+                result+=mult(operands);
+            }
+        }
+        System.out.println("The total of answers to all problems is " + result);
+    }
+
+    public static long sum(ArrayList<String> numbers){
+        long res = 0;
+        for(int i = 0; i < numbers.size(); i++){
+            res+=Long.parseLong(numbers.get(i));
+        }
+        return res;
+    }
+
+    public static long mult(ArrayList<String> numbers){
+        long res = 1;
+        for(int i = 0; i < numbers.size(); i++){
+            res *= Long.parseLong(numbers.get(i));
+        }
+        return res;
     }
 }
 
