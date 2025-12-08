@@ -17,7 +17,8 @@ public class Main {
         //d5p1();
         //d5p2();
         //d6p1();
-        d6p2();
+        //d6p2();
+        d7p1();
     }
 
     public static void d1p1() throws IOException {
@@ -594,7 +595,54 @@ public class Main {
         return res;
     }
 
-    //todo can be more efficient
+    public static void d7p1() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-7-input.txt"));
+        String line = fileReader.readLine();
+        ArrayList<String> lines = new ArrayList<>();
+        while(line != null){
+            lines.add(line);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        int rowLen = lines.get(0).length();
+        boolean[] arr = new boolean[rowLen];
+        int splitCounter = 0;
+        for(int i = 0; i < lines.size(); i++) {
+            String row = lines.get(i);
+            boolean[] newArr = arr.clone();
+            for(int j = 0; j < row.length(); j++){
+                if(row.charAt(j) == 'S'){
+                    newArr[j] = true;
+                }
+                if(row.charAt(j) == '^' && arr[j]){
+                    newArr[j] = false;
+                    if(!arr[j-1]){
+                        newArr[j-1] = true;
+                    }
+                    if(!arr[j+1]){
+                        newArr[j+1] = true;
+                    }
+                    if(newArr[j-1] || newArr[j+1]){
+                        splitCounter++;
+                    }
+                }
+            }
+            arr = newArr;
+            day7Printer(arr);
+        }
+        System.out.println(splitCounter);
+    }
+
+    public  static void day7Printer(boolean[] a){
+        for(int i = 0; i < a.length; i++){
+            if(a[i]){
+                System.out.print("1");
+            } else {
+                System.out.print("0");
+            }
+        }
+        System.out.println();
+    }
 }
 
 class Day4Result{
