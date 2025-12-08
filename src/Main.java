@@ -1,9 +1,6 @@
 import java.io.*;
 import java.sql.Array;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
 import static java.lang.Math.min;
 
@@ -516,39 +513,66 @@ public class Main {
         long result = 0;
         while(line != null){
             allLines.add(line);
+            problems.add(new ArrayList<>());
             line = fileReader.readLine();
         }
         fileReader.close();
-        for(int i = 0; i < allLines.size(); i++){
-            line = allLines.get(i);
-            ArrayList<String> rows = new ArrayList<>();
-            while(line.indexOf(' ') != -1){
-                String input;
-                if(line.indexOf(' ') != -1) {
-                    input = line.substring(0, line.indexOf(' '));
-                } else {
-                    input = line.trim();
+        //iterate over operands to find size of column (index of next operand -2)
+        //iterate through previous lines to get numbers, replace spaces with 0 and reverse
+        String operandLine = allLines.get(allLines.size()-1);
+        while(operandLine.length() > 1){
+            int columnIndex = 0;
+            for(int i = 1; i < operandLine.length(); i++){
+                if(operandLine.charAt(i) == '+' || operandLine.charAt(i) == '*'){
+                    columnIndex = i-1;
+                    break;
                 }
-                if(!input.isEmpty()){
-                    rows.add(input);
-                }
-                line = line.substring(line.indexOf(' ')+1).trim();
             }
-            rows.add(line.trim());
-            problems.add(rows);
+            problems.get(problems.size()-1).add(operandLine.substring(0,columnIndex));
+            for(int i = 0; i < allLines.size()-1; i++){
+                String input = allLines.get(i);
+                problems.get(i).add(input.substring(0,columnIndex));
+                allLines.remove(i);
+                allLines.add(i,input.substring(columnIndex+1));
+            }
+            operandLine = operandLine.substring(columnIndex+1);
+        }
+        problems.get(problems.size()-1).add(operandLine);
+        int padLen = 0;
+        for(int i = 0; i < problems.size()-1; i++){
+            padLen = Math.max(padLen, allLines.get(i).length());
+        }
+        for(int i = 0; i < problems.size()-1; i++){
+            String input = allLines.get(i);
+            while(input.length() < padLen){
+                input+=" ";
+            }
+            problems.get(i).add(input);
         }
         for(int i = 0; i < problems.get(0).size(); i++){
-            String operator = problems.get(problems.size()-1).get(i);
+            String operator = problems.get(problems.size()-1).get(i).trim();
+            System.out.println("operator " + operator);
             ArrayList<String> operands = new ArrayList<>();
+            ArrayList<String> modifiedOperands = new ArrayList();
             for(int j = 0; j < problems.size()-1; j++){
                 operands.add(problems.get(j).get(i));
             }
-            //pad and flip
+            System.out.println("original: " + Arrays.toString(operands.toArray()));
+            for(int j = operands.get(0).length()-1; j > -1; j--){
+                String newNum = "";
+                for(int k = 0; k < operands.size(); k++){
+                    newNum += operands.get(k).charAt(j);
+                }
+                modifiedOperands.add(newNum.trim());
+            }
+            System.out.println("modified: " + Arrays.toString(modifiedOperands.toArray()));
             if(operator.equals("+")){
-                result+=sum(operands);
+                System.out.println("sum " + sum(modifiedOperands));
+                result+=sum(modifiedOperands);
             }
             if(operator.equals("*")){
-                result+=mult(operands);
+                System.out.println("mult " + mult(modifiedOperands));
+                result+=mult(modifiedOperands);
             }
         }
         System.out.println("The total of answers to all problems is " + result);
@@ -569,6 +593,8 @@ public class Main {
         }
         return res;
     }
+
+    //todo can be more efficient
 }
 
 class Day4Result{
