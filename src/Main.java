@@ -18,7 +18,8 @@ public class Main {
         //d5p2();
         //d6p1();
         //d6p2();
-        d7p1();
+        //d7p1();
+        d7p2();
     }
 
     public static void d1p1() throws IOException {
@@ -631,6 +632,40 @@ public class Main {
             day7Printer(arr);
         }
         System.out.println(splitCounter);
+    }
+
+    public static void d7p2() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-7-input.txt"));
+        String line = fileReader.readLine();
+        ArrayList<String> lines = new ArrayList<>();
+        long[] timelineCounter = new long[line.length()];
+        long totalTimelines = 0;
+        while (line != null) {
+            lines.add(line);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        String initialRow = lines.get(0);
+        for(int i = 0; i < initialRow.length(); i++){
+            if(initialRow.charAt(i) == 'S'){
+                timelineCounter[i] = 1;
+                break;
+            }
+        }
+        for(int i = 1; i < lines.size(); i++){
+            String manifoldRow = lines.get(i);
+            for(int j = 0; j < manifoldRow.length(); j++){
+                if(manifoldRow.charAt(j) == '^'){
+                    timelineCounter[j-1] += timelineCounter[j];
+                    timelineCounter[j+1] += timelineCounter[j];
+                    timelineCounter[j] = 0;
+                }
+            }
+        }
+        for(int i = 0; i < timelineCounter.length; i++){
+            totalTimelines+=timelineCounter[i];
+        }
+        System.out.println("There are " + totalTimelines + " timelines.");
     }
 
     public  static void day7Printer(boolean[] a){
