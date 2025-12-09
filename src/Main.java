@@ -20,7 +20,8 @@ public class Main {
         //d6p2();
         //d7p1();
         //d7p2();
-        d8p1();
+        //d8p1(); //todo come back
+        d9p1();
     }
 
     public static void d1p1() throws IOException {
@@ -769,6 +770,31 @@ public class Main {
         }
         return -1;
     }
+
+    public static void d9p1() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-9-input.txt"));
+        String line = fileReader.readLine();
+        ArrayList<Coordinate> tileCoordinates = new ArrayList<>();
+        long maxArea = Long.MIN_VALUE;
+        while(line != null){
+            String[] coords = line.split(",");
+            Coordinate newTile = new Coordinate(Long.parseLong(coords[0]), Long.parseLong(coords[1]));
+            tileCoordinates.add(newTile);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        tileCoordinates.sort(Coordinate::compare);
+        for(int i = 0; i < tileCoordinates.size(); i++){
+            Coordinate one = tileCoordinates.get(i);
+            for(int j = i+1; j < tileCoordinates.size(); j++) {
+                Coordinate two = tileCoordinates.get(j);
+                long maybeMax = (Math.abs(two.x - one.x)+1) * (Math.abs(two.y - one.y+1));
+                System.out.printf("%s %s = %d\n", one, two, maybeMax);
+                maxArea = Math.max(maxArea, maybeMax);
+            }
+        }
+        System.out.println("the largest area you can make is " + maxArea);
+    }
 }
 
 class Day4Result{
@@ -833,5 +859,25 @@ class JunctionPair{
 
     public String toString(){
         return boxA.toString() + " " + boxB.toString() + " " + distance;
+    }
+}
+
+class Coordinate{
+    long x, y;
+
+    public Coordinate(long xPos, long yPos){
+        x = xPos;
+        y = yPos;
+    }
+
+    public static int compare(Coordinate o1, Coordinate o2) {
+        if(o1.x == o2.x){
+            return (int) (o1.y-o2.y);
+        }
+        return (int) (o1.x-o2.x);
+    }
+
+    public String toString(){
+        return "(" + x + "," + y + ")";
     }
 }
