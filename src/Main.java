@@ -19,7 +19,8 @@ public class Main {
         //d6p1();
         //d6p2();
         //d7p1();
-        d7p2();
+        //d7p2();
+        d8p1();
     }
 
     public static void d1p1() throws IOException {
@@ -668,7 +669,7 @@ public class Main {
         System.out.println("There are " + totalTimelines + " timelines.");
     }
 
-    public  static void day7Printer(boolean[] a){
+    public static void day7Printer(boolean[] a){
         for(int i = 0; i < a.length; i++){
             if(a[i]){
                 System.out.print("1");
@@ -677,6 +678,96 @@ public class Main {
             }
         }
         System.out.println();
+    }
+
+    public static void d8p1() throws IOException {
+        String filename = "data/day-8-sample.txt";
+        int numConnections = 10;
+        if (filename.contains("input")) {
+            numConnections = 1000;
+        }
+        BufferedReader fileReader = new BufferedReader(new FileReader(filename));
+        String line = fileReader.readLine();
+        ArrayList<JunctionBoxCoords> boxList = new ArrayList<>();
+        ArrayList<JunctionPair> distanceList = new ArrayList<>();
+        ArrayList<ArrayList<JunctionBoxCoords>> circuits = new ArrayList<>();
+        ArrayList<Integer> circuitLengths = new ArrayList<>();
+        int nc = 0;
+        long res = 1;
+        while (line != null) {
+            String[] coords = line.split(",");
+            boxList.add(new JunctionBoxCoords(Long.parseLong(coords[0]), Long.parseLong(coords[1]), Long.parseLong(coords[2])));
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        for(int i = 0; i < boxList.size(); i++){
+            JunctionBoxCoords boxA = boxList.get(i);
+            for(int j = i+1; j < boxList.size(); j++){
+                JunctionBoxCoords boxB = boxList.get(j);
+                JunctionPair pair = new JunctionPair(boxA, boxB, boxA.distance(boxB));
+                distanceList.add(pair);
+            }
+        }
+        distanceList.sort(JunctionPair::compare);
+        for(int i = 0; i < distanceList.size(); i++){
+            System.out.println(distanceList.get(i));
+        }
+        System.out.println("--------");
+        while(nc < numConnections){
+            JunctionPair p = distanceList.get(0);
+            distanceList.remove(p);
+            System.out.println("connecting " + p);
+            JunctionBoxCoords boxA = p.boxA;
+            JunctionBoxCoords boxB = p.boxB;
+            int circuitIndexA = findCircuit(boxA, circuits);
+            int circuitIndexB = findCircuit(boxB, circuits);
+            if(circuitIndexA == -1 && circuitIndexB == -1){ //if both arent in a circuit
+                ArrayList<JunctionBoxCoords> newCircuit = new ArrayList<>();
+                newCircuit.add(boxA);
+                newCircuit.add(boxB);
+                circuits.add(newCircuit);
+            } else if(circuitIndexA == -1){ //if A is not in a circuit but B is
+                circuits.get(circuitIndexB).add(boxA);
+            } else if(circuitIndexB == -1){ //if B is not in a circuit but A is
+                circuits.get(circuitIndexA).add(boxB);
+            } else if(circuitIndexA != circuitIndexB){ //neither is -1 and in different circuits
+                //todo something wrong here
+                ArrayList<JunctionBoxCoords> secondCircuit = circuits.get(circuitIndexB);
+                for(int i = 0; i < secondCircuit.size(); i++){
+                    circuits.get(circuitIndexA).add(secondCircuit.get(i));
+                }
+                circuits.remove(circuitIndexB);
+            } else if(circuitIndexA == circuitIndexB){ //if they're the same then ignore
+                nc--;
+            }
+            nc++;
+        }
+        System.out.println("--------");
+        for(int i = 0; i < circuits.size(); i++){
+            circuitLengths.add(circuits.get(i).size());
+            ArrayList<JunctionBoxCoords> circuit = circuits.get(i);
+            for(int j = 0; j < circuit.size(); j++){
+                System.out.print(circuit.get(j) + " ");
+            }
+            System.out.println();
+        }
+        circuitLengths.sort(Integer::compare);
+        for(int i = 0; i < 3; i++){
+            res*=circuitLengths.get(circuitLengths.size()-i-1);
+        }
+        System.out.println("The product of the 3 largest circuits is " + res);
+    }
+
+    public static int findCircuit(JunctionBoxCoords box, ArrayList<ArrayList<JunctionBoxCoords>> circuits){
+        for(int i = 0; i < circuits.size(); i++){
+            ArrayList<JunctionBoxCoords> circuit = circuits.get(i);
+            for(int j = 0; j < circuit.size(); j++){
+                if(box == circuit.get(j)){
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 }
 
@@ -687,5 +778,60 @@ class Day4Result{
     public Day4Result(char[][] g, int a){
         grid = g;
         accessible = a;
+    }
+}
+
+class JunctionBoxCoords implements Comparator<JunctionBoxCoords>{
+    long x,y,z;
+
+    public JunctionBoxCoords(){
+        x = 0;
+        y = 0;
+        z = 0;
+    }
+    public JunctionBoxCoords(long xPos, long yPos, long zPos){
+        x = xPos;
+        y = yPos;
+        z = zPos;
+    }
+
+    public long distance(JunctionBoxCoords other){
+        return (long) Math.sqrt((Math.pow(x-other.x,2))+(Math.pow(y-other.y,2))+(Math.pow(z-other.z,2)));
+    }
+
+    @Override
+    public int compare(JunctionBoxCoords o1, JunctionBoxCoords o2) {
+        if(o1.x == o2.x){
+            if(o1.y == o2.y){
+                if(o1.z == o2.z){
+                    return 0;
+                }
+                return (int) (o1.z-o2.z);
+            }
+            return (int) (o1.y-o2.y);
+        }
+        return (int) (o1.x-o2.x);
+    }
+
+    public String toString(){
+        return "(" + x + "," + y + "," + z + ")";
+    }
+}
+
+class JunctionPair{
+    JunctionBoxCoords boxA, boxB;
+    long distance;
+
+    public JunctionPair(JunctionBoxCoords a, JunctionBoxCoords b, long d){
+        boxA = a;
+        boxB = b;
+        distance = d;
+    }
+    public static int compare(JunctionPair o1, JunctionPair o2) {
+        return Long.compare(o1.distance, o2.distance);
+    }
+
+    public String toString(){
+        return boxA.toString() + " " + boxB.toString() + " " + distance;
     }
 }
