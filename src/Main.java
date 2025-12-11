@@ -20,8 +20,9 @@ public class Main {
         //d6p2();
         //d7p1();
         //d7p2();
-        //d8p1(); //todo come back
-        d9p1();
+        //d8p1();
+        //d9p1();
+        d10p1();
     }
 
     public static void d1p1() throws IOException {
@@ -681,6 +682,7 @@ public class Main {
         System.out.println();
     }
 
+    //todo finish 8
     public static void d8p1() throws IOException {
         String filename = "data/day-8-sample.txt";
         int numConnections = 10;
@@ -795,6 +797,27 @@ public class Main {
         }
         System.out.println("the largest area you can make is " + maxArea);
     }
+
+    //todo do 9-2
+
+    public static void d10p1() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-10-input.txt"));
+        ArrayList<IndicatorLight> indicatorLights = new ArrayList<>();
+        ArrayList<Integer> results = new ArrayList<>();
+        int finalSum = 0;
+        String line = fileReader.readLine();
+        while(line != null){
+            indicatorLights.add(new IndicatorLight(line));
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        for(int i = 0; i < indicatorLights.size(); i++){
+            int r = indicatorLights.get(i).minPress();
+            results.add(r);
+            finalSum+=r;
+        }
+        System.out.println("The sum of minimum button presses to configure the machine correctly is " + finalSum);
+    }
 }
 
 class Day4Result{
@@ -879,5 +902,82 @@ class Coordinate{
 
     public String toString(){
         return "(" + x + "," + y + ")";
+    }
+}
+
+class IndicatorLight{
+    boolean[] finalState;
+    ArrayList<ArrayList<Integer>> buttonSequences; //arraylist<int> is the button
+    ArrayList<Integer> joltages;
+
+    public IndicatorLight(String input){
+        String stateIndicator = input.substring(1,input.indexOf("]"));
+        String[] joltageString = input.substring(input.indexOf("{")+1,input.indexOf("}")).split(",");
+        input = input.substring(input.indexOf("]")+1, input.indexOf("{")).trim();
+        String[] buttonArr = input.split(" ");
+        finalState = new boolean[stateIndicator.length()];
+        buttonSequences = new ArrayList<>();
+        joltages = new ArrayList<>();
+        for(int i = 0; i < stateIndicator.length(); i++){
+            if(stateIndicator.charAt(i) == '.'){
+                finalState[i] = false;
+            } else {
+                finalState[i] = true;
+            }
+        }
+        for(int i = 0; i < buttonArr.length; i++){
+            String[] buttons = buttonArr[i].substring(1,buttonArr[i].length()-1).split(",");
+            ArrayList<Integer> buttonSeq = new ArrayList<>();
+            for(int j = 0; j < buttons.length; j++){
+                buttonSeq.add(Integer.parseInt(buttons[j]));
+            }
+            buttonSequences.add(buttonSeq);
+        }
+        for(int i = 0; i < joltageString.length; i++){
+            joltages.add(Integer.parseInt(joltageString[i]));
+        }
+    }
+
+    //todo i know this is really inefficient but
+    public int minPress(){
+        ArrayList<ArrayList<ArrayList<Integer>>> testSequences = new ArrayList<>();
+        for(int i = 0; i < buttonSequences.size(); i++){
+            ArrayList<ArrayList<Integer>> ts = new ArrayList<>();
+            ts.add(buttonSequences.get(i));
+            testSequences.add(ts);
+        }
+        while(true){
+            for(int i = 0; i < testSequences.size(); i++) {
+                ArrayList<ArrayList<Integer>> testSequence = testSequences.get(i);
+                //System.out.println(Arrays.toString(testSequence.toArray()));
+                boolean[] testLights = new boolean[finalState.length];
+                for(int j = 0; j < testSequence.size(); j++){
+                    ArrayList<Integer> lights = testSequence.get(j);
+                    for(int k = 0; k < lights.size(); k++){
+                        testLights[lights.get(k)] = !testLights[lights.get(k)];
+                    }
+                }
+                if(Arrays.toString(testLights).equals(Arrays.toString(finalState))){
+                    return testSequence.size();
+                }
+            } //if we're out of this then it means nothing worked
+            ArrayList<ArrayList<ArrayList<Integer>>> newSequences = new ArrayList<>();
+            for(int i = 0; i < testSequences.size(); i++){
+                for(int j = 0; j < buttonSequences.size(); j++){
+                    ArrayList<ArrayList<Integer>> oldSequence = new ArrayList<>(testSequences.get(i));
+                    oldSequence.add(buttonSequences.get(j));
+                    newSequences.add(oldSequence);
+                }
+            }
+            testSequences = newSequences;
+        }
+    }
+
+    public String toString(){
+        String buttonString = "";
+        for(int i = 0; i < buttonSequences.size(); i++){
+            buttonString += Arrays.toString(buttonSequences.get(i).toArray());
+        }
+        return "final state: " + Arrays.toString(finalState) + " buttons: " + buttonString + " joltages: " + Arrays.toString(joltages.toArray());
     }
 }
