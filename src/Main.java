@@ -22,7 +22,8 @@ public class Main {
         //d7p2();
         //d8p1();
         //d9p1();
-        d10p1();
+        //d10p1();
+        d11p1();
     }
 
     public static void d1p1() throws IOException {
@@ -817,6 +818,46 @@ public class Main {
             finalSum+=r;
         }
         System.out.println("The sum of minimum button presses to configure the machine correctly is " + finalSum);
+    }
+
+    public static void d11p1() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-11-input.txt"));
+        String line = fileReader.readLine();
+        HashMap<String, ArrayList<String>> paths = new HashMap<>();
+        ArrayList<ArrayList<String>> testPaths = new ArrayList<>();
+        ArrayList<ArrayList<String>> finalPaths = new ArrayList<>();
+        while(line != null){
+            String key = line.substring(0,line.indexOf(":"));
+            ArrayList<String> value = new ArrayList<>(List.of(line.substring(line.indexOf(":") + 1).trim().split(" ")));
+            paths.put(key,value);
+            line = fileReader.readLine();
+        }
+        fileReader.close();
+        ArrayList<String> tmp = new ArrayList<>();
+        tmp.add("you");
+        testPaths.add(tmp);
+        while(testPaths.size() != 0){
+            ArrayList<String> currentTestPath = testPaths.get(0);
+            testPaths.remove(0);
+            System.out.println("testing " + Arrays.toString(currentTestPath.toArray()));
+            String lastServer = currentTestPath.get(currentTestPath.size()-1);
+            if(lastServer.equals("out")){
+                System.out.println("added to final path");
+                finalPaths.add(currentTestPath);
+            } else {
+                ArrayList<String> nextServerList = paths.get(lastServer);
+                for(int i = 0; i < nextServerList.size(); i++){
+                    String nextServer = nextServerList.get(i);
+                    if(!currentTestPath.contains(nextServer)){
+                        System.out.println("adding " + nextServer + " to path");
+                        ArrayList<String> newPath = new ArrayList<>(currentTestPath);
+                        newPath.add(nextServer);
+                        testPaths.add(newPath);
+                    }
+                }
+            }
+        }
+        System.out.println("There are " + finalPaths.size() + " paths from you to out");
     }
 }
 
