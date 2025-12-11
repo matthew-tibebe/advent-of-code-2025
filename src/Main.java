@@ -23,7 +23,7 @@ public class Main {
         //d8p1();
         //d9p1();
         //d10p1();
-        d11p1();
+        d11(true);
     }
 
     public static void d1p1() throws IOException {
@@ -820,12 +820,13 @@ public class Main {
         System.out.println("The sum of minimum button presses to configure the machine correctly is " + finalSum);
     }
 
-    public static void d11p1() throws IOException {
+    public static void d11(boolean part2) throws IOException {
         BufferedReader fileReader = new BufferedReader(new FileReader("data/day-11-input.txt"));
         String line = fileReader.readLine();
         HashMap<String, ArrayList<String>> paths = new HashMap<>();
         ArrayList<ArrayList<String>> testPaths = new ArrayList<>();
-        ArrayList<ArrayList<String>> finalPaths = new ArrayList<>();
+        ArrayList<ArrayList<String>> finalPathsP1 = new ArrayList<>();
+        ArrayList<ArrayList<String>> finalPathsP2 = new ArrayList<>();
         while(line != null){
             String key = line.substring(0,line.indexOf(":"));
             ArrayList<String> value = new ArrayList<>(List.of(line.substring(line.indexOf(":") + 1).trim().split(" ")));
@@ -834,7 +835,11 @@ public class Main {
         }
         fileReader.close();
         ArrayList<String> tmp = new ArrayList<>();
-        tmp.add("you");
+        if(part2){
+            tmp.add("svr"); //todo takes forever, fix somehow
+        } else {
+            tmp.add("you");
+        }
         testPaths.add(tmp);
         while(testPaths.size() != 0){
             ArrayList<String> currentTestPath = testPaths.get(0);
@@ -843,7 +848,7 @@ public class Main {
             String lastServer = currentTestPath.get(currentTestPath.size()-1);
             if(lastServer.equals("out")){
                 System.out.println("added to final path");
-                finalPaths.add(currentTestPath);
+                finalPathsP1.add(currentTestPath);
             } else {
                 ArrayList<String> nextServerList = paths.get(lastServer);
                 for(int i = 0; i < nextServerList.size(); i++){
@@ -852,12 +857,24 @@ public class Main {
                         System.out.println("adding " + nextServer + " to path");
                         ArrayList<String> newPath = new ArrayList<>(currentTestPath);
                         newPath.add(nextServer);
-                        testPaths.add(newPath);
+                        if(!testPaths.contains(newPath)) {
+                            testPaths.add(newPath);
+                        }
                     }
                 }
             }
         }
-        System.out.println("There are " + finalPaths.size() + " paths from you to out");
+        if(part2) {
+            for (int i = 0; i < finalPathsP1.size(); i++) {
+                ArrayList<String> test = finalPathsP1.get(i);
+                if (test.contains("dac") && test.contains("fft")) {
+                    finalPathsP2.add(test);
+                }
+            }
+            System.out.println("There are " + finalPathsP2.size() + " paths from svr to out");
+        } else {
+            System.out.println("There are " + finalPathsP1.size() + " paths from you to out");
+        }
     }
 }
 
