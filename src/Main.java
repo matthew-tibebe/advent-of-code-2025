@@ -801,7 +801,7 @@ public class Main {
     //todo do 9-2
 
     public static void d10p1() throws IOException {
-        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-10-input.txt"));
+        BufferedReader fileReader = new BufferedReader(new FileReader("data/day-10-sample.txt"));
         ArrayList<IndicatorLight> indicatorLights = new ArrayList<>();
         ArrayList<Integer> results = new ArrayList<>();
         int finalSum = 0;
@@ -812,7 +812,7 @@ public class Main {
         }
         fileReader.close();
         for(int i = 0; i < indicatorLights.size(); i++){
-            int r = indicatorLights.get(i).minPress();
+            int r = indicatorLights.get(i).minPress(true);
             results.add(r);
             finalSum+=r;
         }
@@ -938,8 +938,8 @@ class IndicatorLight{
         }
     }
 
-    //todo i know this is really inefficient but
-    public int minPress(){
+    //todo i know this is really inefficient but - make more efficient for 10-2
+    public int minPress(boolean careAboutJoltage){
         ArrayList<ArrayList<ArrayList<Integer>>> testSequences = new ArrayList<>();
         for(int i = 0; i < buttonSequences.size(); i++){
             ArrayList<ArrayList<Integer>> ts = new ArrayList<>();
@@ -951,13 +951,15 @@ class IndicatorLight{
                 ArrayList<ArrayList<Integer>> testSequence = testSequences.get(i);
                 //System.out.println(Arrays.toString(testSequence.toArray()));
                 boolean[] testLights = new boolean[finalState.length];
+                int[] testJoltages = new int[joltages.size()];
                 for(int j = 0; j < testSequence.size(); j++){
                     ArrayList<Integer> lights = testSequence.get(j);
                     for(int k = 0; k < lights.size(); k++){
                         testLights[lights.get(k)] = !testLights[lights.get(k)];
+                        testJoltages[lights.get(k)]++;
                     }
                 }
-                if(Arrays.toString(testLights).equals(Arrays.toString(finalState))){
+                if(Arrays.toString(testLights).equals(Arrays.toString(finalState)) && (careAboutJoltage && Arrays.toString(testJoltages).equals(Arrays.toString(joltages.toArray())))){
                     return testSequence.size();
                 }
             } //if we're out of this then it means nothing worked
